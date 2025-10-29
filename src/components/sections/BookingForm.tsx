@@ -153,19 +153,43 @@ const BookingForm: React.FC = () => {
     setSubmitError(null);
 
     try {
-      // TODO: API call will be implemented in Sprint 5
-      console.log('Form data to submit:', data);
+      // Call the appointments API
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Handle error responses
+        if (response.status === 409) {
+          setSubmitError(result.message || 'You already have a pending appointment for this date.');
+        } else if (response.status === 400) {
+          setSubmitError('Please check your form data and try again.');
+        } else {
+          setSubmitError(
+            result.message ||
+              'Failed to submit your booking. Please try again or contact us directly.'
+          );
+        }
+        return;
+      }
 
       // Clear draft from localStorage on successful submission
       localStorage.removeItem(FORM_STORAGE_KEY);
 
       // TODO: Redirect to confirmation page in Sprint 6
-      alert('Form submitted successfully! API integration coming in Sprint 5.');
+      // For now, show success message and reset form
+      alert(
+        `Success! Your appointment has been booked.\n\nAppointment ID: ${result.data.id}\n\nWe'll send a confirmation email to ${result.data.email} shortly.`
+      );
       reset();
       setCurrentStep(0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Form submission error:', error);
       setSubmitError('Failed to submit your booking. Please try again or contact us directly.');
