@@ -39,7 +39,7 @@ export const personalInfoSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  current_website: z.boolean().default(false),
+  current_website: z.boolean(),
 });
 
 // Step 2: Project Details Schema
