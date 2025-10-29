@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { bookingFormSchema } from '@/lib/validation/bookingSchema';
 import { createAppointment, checkDuplicateAppointment } from '@/lib/supabase/appointments';
 import { ZodError } from 'zod';
+import { sendBulkEmails } from '@/lib/email/resend';
+import { generateClientConfirmationEmail } from '@/lib/email/templates/clientConfirmation';
+import { generateAdminNotificationEmail } from '@/lib/email/templates/adminNotification';
 
 /**
  * POST /api/appointments
@@ -88,6 +91,27 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Send confirmation emails (client + admin)
+    const clientEmail = generateClientConfirmationEmail(appointment);
+    const adminEmail = generateAdminNotificationEmail(appointment);
+    const adminEmailAddress = process.env.ADMIN_EMAIL || 'admin@setappointmentapp.com';
+
+    // Send emails in parallel (non-blocking - don't fail if emails fail)
+    sendBulkEmails([
+      {
+        to: appointment.email,
+        ...clientEmail,
+      },
+      {
+        to: adminEmailAddress,
+        ...adminEmail,
+        replyTo: appointment.email,
+      },
+    ]).catch((error) => {
+      // Log error but don't fail the request
+      console.error('Error sending emails:', error);
+    });
 
     // Return success response with appointment ID
     return NextResponse.json(

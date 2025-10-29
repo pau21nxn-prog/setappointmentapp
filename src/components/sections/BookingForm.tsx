@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import {
   BookingFormData,
   bookingFormSchema,
@@ -38,6 +39,7 @@ const formSteps: FormProgressStep[] = [
 ];
 
 const BookingForm: React.FC = () => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -182,14 +184,9 @@ const BookingForm: React.FC = () => {
       // Clear draft from localStorage on successful submission
       localStorage.removeItem(FORM_STORAGE_KEY);
 
-      // TODO: Redirect to confirmation page in Sprint 6
-      // For now, show success message and reset form
-      alert(
-        `Success! Your appointment has been booked.\n\nAppointment ID: ${result.data.id}\n\nWe'll send a confirmation email to ${result.data.email} shortly.`
-      );
-      reset();
-      setCurrentStep(0);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Redirect to confirmation page with appointment details
+      const confirmationUrl = `/confirmation?id=${result.data.id}&email=${encodeURIComponent(result.data.email)}&date=${result.data.preferred_date}&time=${encodeURIComponent(result.data.preferred_time)}`;
+      router.push(confirmationUrl);
     } catch (error) {
       console.error('Form submission error:', error);
       setSubmitError('Failed to submit your booking. Please try again or contact us directly.');
