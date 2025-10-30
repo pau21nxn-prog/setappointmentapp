@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: 'Invalid email address',
-          errors: validationResult.error.errors,
+          errors: validationResult.error.issues,
         },
         { status: 400 }
       );
