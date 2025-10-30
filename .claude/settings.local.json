@@ -1,6 +1,12 @@
 {
   "permissions": {
-    "allow": ["Bash(npm install:*)"],
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(git push:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: add form validation schemas and type guards\n\nSprint 3 - Form Validation & Schema\n\nNew Files:\n- formOptions.ts: Dropdown options for booking form\n  (industries, project types, budgets, timelines, etc.)\n- bookingSchema.ts: Zod validation schemas for multi-step form\n  (personalInfo, projectDetails, scheduling, complete)\n- typeGuards.ts: Runtime type checking functions\n\nFeatures:\n- Complete Zod validation for all form fields\n- Separate schemas for each form step\n- Email, phone, URL validation\n- Future date validation for scheduling\n- Type-safe form data with TypeScript inference\n- Comprehensive test suite (108 tests passing)\n\nTests:\n- Personal info validation tests\n- Project details validation tests\n- Scheduling validation tests\n- Complete form validation tests\n- Edge case handling\n\nAll tests passing, build successful\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+    ],
     "deny": [],
     "ask": []
   }
