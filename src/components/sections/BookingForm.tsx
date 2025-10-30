@@ -17,6 +17,7 @@ import ProjectDetailsStep from '@/components/sections/booking/ProjectDetailsStep
 import SchedulingStep from '@/components/sections/booking/SchedulingStep';
 import { Button } from '@/components/ui/Button';
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react';
+import { trackFormSubmission } from '@/lib/analytics/gtag';
 
 const FORM_STORAGE_KEY = 'booking-form-draft';
 
@@ -73,6 +74,7 @@ const BookingForm: React.FC = () => {
       preferred_date: '',
       preferred_time: '',
       timezone: '',
+      website: '', // Honeypot field for spam detection
     },
   });
 
@@ -184,6 +186,14 @@ const BookingForm: React.FC = () => {
       // Clear draft from localStorage on successful submission
       localStorage.removeItem(FORM_STORAGE_KEY);
 
+      // Track conversion in Google Analytics
+      trackFormSubmission({
+        email: data.email,
+        company_name: data.company_name,
+        project_type: data.project_type,
+        budget_range: data.budget_range,
+      });
+
       // Redirect to confirmation page with appointment details
       const confirmationUrl = `/confirmation?id=${result.data.id}&email=${encodeURIComponent(result.data.email)}&date=${result.data.preferred_date}&time=${encodeURIComponent(result.data.preferred_time)}`;
       router.push(confirmationUrl);
@@ -231,6 +241,19 @@ const BookingForm: React.FC = () => {
         {/* Form Card */}
         <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
           <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Honeypot field - hidden from users, visible to bots */}
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="website">Website</label>
+              <input
+                {...register('website')}
+                type="text"
+                id="website"
+                name="website"
+                autoComplete="off"
+                tabIndex={-1}
+              />
+            </div>
+
             {/* Step Content */}
             <div className="mb-8">{renderStep()}</div>
 

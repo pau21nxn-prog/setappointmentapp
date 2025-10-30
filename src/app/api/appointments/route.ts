@@ -5,6 +5,11 @@ import { ZodError } from 'zod';
 import { sendBulkEmails } from '@/lib/email/resend';
 import { generateClientConfirmationEmail } from '@/lib/email/templates/clientConfirmation';
 import { generateAdminNotificationEmail } from '@/lib/email/templates/adminNotification';
+import {
+  sanitizeBookingFormData,
+  containsSqlInjection,
+  containsXss,
+} from '@/lib/security/sanitize';
 
 /**
  * POST /api/appointments
@@ -14,6 +19,31 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body
     const body = await request.json();
+
+    // Honeypot spam detection
+    // If the 'website' field is filled, it's likely a bot
+    if (body.website && body.website.trim() !== '') {
+      // Log spam attempt (optional)
+      console.warn('Honeypot triggered - potential spam submission blocked', {
+        ip:
+          request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip'),
+        timestamp: new Date().toISOString(),
+      });
+
+      // Return success to the bot (don't let them know they were caught)
+      // This prevents them from adjusting their spam tactics
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Booking received successfully',
+          data: {
+            id: 'spam-blocked',
+            email: body.email || 'unknown',
+          },
+        },
+        { status: 200 }
+      );
+    }
 
     // Validate request body against schema
     let validatedData;
@@ -36,10 +66,40 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
+    // Additional security: Check for SQL injection and XSS attempts
+    const suspiciousFields = Object.entries(validatedData).filter(([_key, value]) => {
+      if (typeof value === 'string') {
+        return containsSqlInjection(value) || containsXss(value);
+      }
+      return false;
+    });
+
+    if (suspiciousFields.length > 0) {
+      console.warn('Security: Suspicious input detected', {
+        fields: suspiciousFields.map(([key]) => key),
+        ip:
+          request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip'),
+        timestamp: new Date().toISOString(),
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid input detected',
+          message:
+            'Your submission contains invalid characters. Please review your input and try again.',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize all input data before processing
+    const sanitizedData = sanitizeBookingFormData(validatedData) as typeof validatedData;
+
     // Check for duplicate appointments
     const { isDuplicate, error: duplicateError } = await checkDuplicateAppointment(
-      validatedData.email,
-      validatedData.preferred_date
+      sanitizedData.email as string,
+      sanitizedData.preferred_date as string
     );
 
     if (duplicateError) {
@@ -72,9 +132,9 @@ export async function POST(request: NextRequest) {
       undefined;
     const user_agent = request.headers.get('user-agent') || undefined;
 
-    // Create appointment
+    // Create appointment with sanitized data
     const { data: appointment, error: createError } = await createAppointment({
-      ...validatedData,
+      ...sanitizedData,
       ip_address,
       user_agent,
     });

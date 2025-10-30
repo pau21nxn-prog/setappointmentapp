@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 import { testimonials } from '@/data/testimonials';
@@ -115,11 +116,16 @@ const Testimonials: React.FC = () => {
 
                     {/* Author */}
                     <div className="flex items-center gap-4">
-                      <img
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-emerald-100"
-                      />
+                      <div className="relative w-16 h-16">
+                        <Image
+                          src={testimonial.avatar || '/placeholder-avatar.png'}
+                          alt={testimonial.name}
+                          width={64}
+                          height={64}
+                          className="rounded-full object-cover border-2 border-emerald-100"
+                          priority={false}
+                        />
+                      </div>
                       <div>
                         <div className="font-semibold text-gray-900 text-lg">
                           {testimonial.name}

@@ -101,6 +101,10 @@ export const bookingFormSchema = z.object({
 
   // Step 3: Scheduling
   ...schedulingSchema.shape,
+
+  // Honeypot field for spam detection (should remain empty)
+  // This field is hidden from users but bots will often fill it
+  website: z.string().max(0, 'This field should be empty').optional().or(z.literal('')),
 });
 
 // Type inference for TypeScript
