@@ -12,24 +12,25 @@
 import { ReactNode } from 'react';
 import { getAdminSession } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { LogoutButton } from './LogoutButton';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  // Get admin session
-  const session = await getAdminSession();
+  // Get current pathname from headers
+  const headersList = headers();
+  const pathname = headersList.get('x-pathname') || '';
 
   // If on login or callback pages, render without layout
-  // (These pages have their own layout)
-  if (typeof window !== 'undefined') {
-    const pathname = window.location.pathname;
-    if (pathname.includes('/login') || pathname.includes('/callback')) {
-      return <>{children}</>;
-    }
+  // (These pages have their own layout and don't require authentication)
+  if (pathname.includes('/admin/login') || pathname.includes('/admin/auth/callback')) {
+    return <>{children}</>;
   }
 
-  // If no session and not on login/callback, this is handled by middleware
-  // but we double-check here
+  // Get admin session for protected routes
+  const session = await getAdminSession();
+
+  // If no session, redirect to login
   if (!session) {
     redirect('/admin/login');
   }

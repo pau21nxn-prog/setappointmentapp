@@ -32,6 +32,10 @@ import {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Add pathname header for all admin routes (used by layout to determine page)
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+
   // 1. ADMIN ROUTE PROTECTION
   // Check if accessing admin routes (except login and auth callback)
   if (
@@ -41,7 +45,7 @@ export async function middleware(request: NextRequest) {
   ) {
     let response = NextResponse.next({
       request: {
-        headers: request.headers,
+        headers: requestHeaders,
       },
     });
 
@@ -61,7 +65,7 @@ export async function middleware(request: NextRequest) {
             });
             response = NextResponse.next({
               request: {
-                headers: request.headers,
+                headers: requestHeaders,
               },
             });
             response.cookies.set({
@@ -78,7 +82,7 @@ export async function middleware(request: NextRequest) {
             });
             response = NextResponse.next({
               request: {
-                headers: request.headers,
+                headers: requestHeaders,
               },
             });
             response.cookies.set({
@@ -175,8 +179,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Continue to the requested page
-  return NextResponse.next();
+  // Continue to the requested page (pass pathname header for layout)
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 /**
