@@ -2,6 +2,7 @@
  * Next.js Edge Middleware
  * =============================================================================
  * Runs before every request to apply:
+ * - Admin route protection (authentication check)
  * - Rate limiting for API routes and form submissions
  * - Security headers
  * - Request logging and monitoring
@@ -9,12 +10,13 @@
  * Middleware runs on Vercel Edge Network for optimal performance
  *
  * Last Updated: 2025-10-30
- * Phase: 3 - Enhancement & Security
+ * Phase: 4 - Admin Dashboard
  * =============================================================================
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import {
   checkFormRateLimit,
   checkApiRateLimit,
@@ -30,6 +32,81 @@ import {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // 1. ADMIN ROUTE PROTECTION
+  // Check if accessing admin routes (except login and auth callback)
+  if (
+    pathname.startsWith('/admin') &&
+    !pathname.startsWith('/admin/login') &&
+    !pathname.startsWith('/admin/auth/callback')
+  ) {
+    let response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            });
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            });
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            });
+          },
+          remove(name: string, options: CookieOptions) {
+            request.cookies.set({
+              name,
+              value: '',
+              ...options,
+            });
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            });
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            });
+          },
+        },
+      }
+    );
+
+    // Check authentication
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    // If no session, redirect to login
+    if (!session) {
+      const redirectUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Session exists, allow access
+    return response;
+  }
+
+  // 2. RATE LIMITING
   // Apply rate limiting based on route
   if (isRateLimitEnabled()) {
     let rateLimitResult;
@@ -109,9 +186,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all API routes
+     * Match all API routes and admin routes
      * Excludes static files and internal Next.js routes
      */
     '/api/:path*',
+    '/admin/:path*',
   ],
 };
