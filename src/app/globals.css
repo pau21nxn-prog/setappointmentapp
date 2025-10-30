@@ -16,6 +16,21 @@
   }
 }
 
+@layer base {
+  /* Custom text selection colors for better visibility */
+  ::selection {
+    background-color: rgb(16 185 129); /* emerald-500 */
+    color: white;
+  }
+
+  /* Specific styling for form inputs and textareas */
+  input::selection,
+  textarea::selection {
+    background-color: rgb(16 185 129); /* emerald-500 */
+    color: white;
+  }
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))

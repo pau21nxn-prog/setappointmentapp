@@ -12,6 +12,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const inputClasses = `
       w-full px-4 py-2 rounded-lg border-2 transition-colors
+      text-gray-900 placeholder:text-gray-400
       focus:outline-none focus:ring-2 focus:ring-offset-1
       disabled:bg-gray-100 disabled:cursor-not-allowed
       ${
