@@ -6,24 +6,50 @@
  * Passwordless authentication via magic link
  * Sends login link to registered admin emails only
  *
- * Last Updated: 2025-10-30
+ * Last Updated: 2025-10-31
  * Phase: 4 - Admin Dashboard
  * =============================================================================
  */
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
+// Error message mapping for auth failures
+const ERROR_MESSAGES: Record<string, string> = {
+  otp_expired: 'Your magic link has expired. Please request a new one.',
+  access_denied: 'Access denied. Please try again.',
+  auth_failed: 'Authentication failed. Please try again.',
+  code_exchange_failed: 'Failed to authenticate. Please request a new magic link.',
+  session_error: 'Session error occurred. Please try again.',
+  no_session: 'Could not establish session. Please try again.',
+  invalid_token: 'Invalid authentication token. Please request a new magic link.',
+};
+
 export default function AdminLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+
+  // Check for authentication errors in URL
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error && ERROR_MESSAGES[error]) {
+      console.log('[Admin Login] Authentication error from URL:', error);
+      setMessage({
+        type: 'error',
+        text: ERROR_MESSAGES[error],
+      });
+      // Clear the error from URL
+      router.replace('/admin/login', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
