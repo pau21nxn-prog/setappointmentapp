@@ -19,6 +19,60 @@ However, there are critical configuration tasks that must be completed for full 
 
 ## 🔴 CRITICAL TASKS - DO IMMEDIATELY (15 minutes)
 
+### ✅ Task 0: Fix Magic Link Redirect Issues (Admin Authentication)
+
+**Status:** ⚠️ **URGENT - Required for admin dashboard access!**
+
+**Why Critical:** Without this fix, admin magic links will redirect to `localhost:3000` instead of your production URL, preventing admin access.
+
+**Steps:**
+
+1. **Update Vercel Environment Variables**
+   - See detailed guide: `docs/VERCEL_ENV_VAR_FIX.md`
+   - Quick steps:
+     1. Go to Vercel Dashboard → Project Settings → Environment Variables
+     2. Add or update `NEXT_PUBLIC_APP_URL`:
+        ```
+        NEXT_PUBLIC_APP_URL=https://setappointmentapp-1dnzvh010-paus-projects-dad48fbd.vercel.app
+        ```
+     3. Apply to **Production** environment
+     4. Save and trigger new deployment (redeploy)
+
+2. **Configure Supabase Auth Settings**
+   - See detailed guide: `docs/SUPABASE_AUTH_FIX.md`
+   - Quick steps:
+     1. Go to Supabase Dashboard → Authentication → URL Configuration
+     2. Update **Site URL**: `https://setappointmentapp-1dnzvh010-paus-projects-dad48fbd.vercel.app`
+     3. Add to **Redirect URLs**:
+        - `https://setappointmentapp-1dnzvh010-paus-projects-dad48fbd.vercel.app/admin/auth/callback`
+        - `https://setappointmentapp-1dnzvh010-paus-projects-dad48fbd.vercel.app/**`
+     4. Save changes
+
+3. **Verify the Fix**
+   - Request new magic link from: `/admin/login`
+   - Check email - link should contain production URL (not localhost)
+   - Click link - should redirect to production dashboard
+   - Verify successful authentication
+
+**Code Changes:**
+
+- ✅ API route updated with smart fallback logic (automatically uses `VERCEL_URL`)
+- ✅ Enhanced logging for debugging
+- ✅ Multi-layer URL detection
+
+**Completion Criteria:**
+
+- [ ] `NEXT_PUBLIC_APP_URL` set in Vercel for Production
+- [ ] New deployment triggered and completed
+- [ ] Supabase Site URL updated to production domain
+- [ ] Supabase Redirect URLs include production callback
+- [ ] Magic link test successful (email shows production URL)
+- [ ] Authentication works from production
+
+**Estimated Time:** 10-15 minutes
+
+---
+
 ### ✅ Task 1: Run Database Migrations in Supabase
 
 **Status:** ⚠️ **REQUIRED - Database tables don't exist yet!**

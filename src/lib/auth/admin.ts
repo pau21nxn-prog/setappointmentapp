@@ -130,7 +130,7 @@ export async function sendAdminMagicLink(
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: redirectTo || `${process.env.NEXT_PUBLIC_APP_URL}/admin/dashboard`,
+        emailRedirectTo: redirectTo || `${process.env.NEXT_PUBLIC_APP_URL}/admin/auth/callback`,
         shouldCreateUser: false, // Don't create new users, only allow existing
       },
     });
