@@ -3,7 +3,7 @@
  * =============================================================================
  * Main admin dashboard with appointment statistics and overview
  *
- * Last Updated: 2025-10-30
+ * Last Updated: 2025-10-31
  * Phase: 4 - Admin Dashboard
  * =============================================================================
  */
@@ -12,6 +12,9 @@ import { getAdminSession } from '@/lib/auth/admin';
 import { createServiceClient } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+
+// Force dynamic rendering for this page (uses cookies for authentication)
+export const dynamic = 'force-dynamic';
 
 // Stats card component
 function StatCard({

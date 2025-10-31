@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/pau/setappointmentapp/troubleshooting/**)",
+      "Read(//c/Users/pau/setappointmentapp/**)",
+      "Bash(if [ -f .env.local ])",
+      "Bash(then echo \"EXISTS\")",
+      "Bash(else echo \"NOT FOUND\")",
+      "Bash(fi)",
+      "Bash(cat:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

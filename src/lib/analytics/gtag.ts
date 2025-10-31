@@ -4,7 +4,7 @@
  * Tracks page views, events, and conversions
  * GDPR/CCPA compliant with consent management
  *
- * Last Updated: 2025-10-30
+ * Last Updated: 2025-10-31
  * Phase: 3 - SEO & Analytics
  * =============================================================================
  */
@@ -18,14 +18,41 @@ export const isGAEnabled = (): boolean => {
   return typeof window !== 'undefined' && GA_MEASUREMENT_ID !== '';
 };
 
+// Type definitions for Google Analytics
+interface GtagConfigParams {
+  page_path?: string;
+  page_title?: string;
+  page_location?: string;
+  send_page_view?: boolean;
+  [key: string]: string | number | boolean | undefined;
+}
+
+interface GtagEventParams {
+  [key: string]: string | number | boolean | undefined;
+}
+
+interface GtagUserProperties {
+  [key: string]: string | number | boolean | undefined;
+}
+
+type GtagArgs =
+  | [command: 'config', targetId: string, config?: GtagConfigParams]
+  | [command: 'event', eventName: string, params?: GtagEventParams]
+  | [command: 'set', property: 'user_properties', properties: GtagUserProperties]
+  | [command: 'consent', action: 'update' | 'default', params: Record<string, string>];
+
+interface DataLayerObject {
+  [key: string]: string | number | boolean | object | undefined;
+}
+
 /**
  * Initialize Google Analytics
  * Called automatically by Next.js Script component
  */
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: GtagArgs) => void;
+    dataLayer: DataLayerObject[];
   }
 }
 
@@ -55,7 +82,7 @@ export const event = (
     category?: string;
     label?: string;
     value?: number;
-    [key: string]: any;
+    [key: string]: string | number | boolean | undefined;
   }
 ): void => {
   if (!isGAEnabled()) return;
@@ -203,7 +230,7 @@ export const setUserProperties = (properties: {
   industry?: string;
   company_size?: string;
   budget_range?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }): void => {
   if (!isGAEnabled()) return;
 

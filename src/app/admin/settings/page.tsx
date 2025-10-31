@@ -3,13 +3,16 @@
  * =============================================================================
  * Admin account settings and preferences (placeholder for Phase 4)
  *
- * Last Updated: 2025-10-30
+ * Last Updated: 2025-10-31
  * Phase: 4 - Admin Dashboard
  * =============================================================================
  */
 
 import { getAdminSession } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
+
+// Force dynamic rendering for this page (uses cookies for authentication)
+export const dynamic = 'force-dynamic';
 
 export default async function AdminSettingsPage() {
   const session = await getAdminSession();
