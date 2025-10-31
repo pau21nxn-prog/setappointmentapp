@@ -11,6 +11,9 @@
 import { getAdminSession, createServiceClient } from '@/lib/auth/admin';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
+import { StatusUpdateButton } from '@/components/admin/StatusUpdateButton';
+import { AddNoteButton } from '@/components/admin/AddNoteButton';
+import { NotesSection } from '@/components/admin/NotesSection';
 
 // Force dynamic rendering for this page (uses cookies for authentication)
 export const dynamic = 'force-dynamic';
@@ -45,6 +48,20 @@ export default async function AppointmentDetailPage({ params }: AppointmentDetai
   // Fetch email history for this appointment
   const { data: emailLogs } = await supabase
     .from('email_logs')
+    .select('*')
+    .eq('appointment_id', params.id)
+    .order('created_at', { ascending: false });
+
+  // Fetch appointment notes
+  const { data: notes } = await supabase
+    .from('appointment_notes')
+    .select('*')
+    .eq('appointment_id', params.id)
+    .order('created_at', { ascending: false });
+
+  // Fetch status history
+  const { data: statusHistory } = await supabase
+    .from('status_history')
     .select('*')
     .eq('appointment_id', params.id)
     .order('created_at', { ascending: false });
@@ -292,12 +309,11 @@ export default async function AppointmentDetailPage({ params }: AppointmentDetai
               <button className="w-full px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium">
                 Send Email
               </button>
-              <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
-                Update Status
-              </button>
-              <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-                Add Note
-              </button>
+              <StatusUpdateButton
+                appointmentId={appointment.id}
+                currentStatus={appointment.status}
+              />
+              <AddNoteButton appointmentId={appointment.id} />
               <a
                 href={`mailto:${appointment.email}`}
                 className="block w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-center"
@@ -357,11 +373,12 @@ export default async function AppointmentDetailPage({ params }: AppointmentDetai
             </div>
           )}
 
-          {/* Timeline Panel */}
+          {/* Status History Panel */}
           <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Status History</h2>
 
             <div className="space-y-4">
+              {/* Appointment Created */}
               <div className="flex items-start">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -394,40 +411,59 @@ export default async function AppointmentDetailPage({ params }: AppointmentDetai
                 </div>
               </div>
 
-              {appointment.updated_at !== appointment.created_at && (
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <svg
-                        className="w-4 h-4 text-blue-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                      </svg>
+              {/* Status Changes */}
+              {statusHistory &&
+                statusHistory.length > 0 &&
+                statusHistory.map((history) => (
+                  <div key={history.id} className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        Status changed to <span className="capitalize">{history.new_status}</span>
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        by {history.changed_by} •{' '}
+                        {new Date(history.created_at).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                      {history.change_reason && (
+                        <p className="text-xs text-gray-600 mt-1 italic">{history.change_reason}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-gray-900">Last Updated</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(appointment.updated_at).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </div>
-                </div>
-              )}
+                ))}
             </div>
+          </div>
+
+          {/* Notes Panel */}
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Internal Notes</h2>
+            <NotesSection
+              notes={notes || []}
+              appointmentId={appointment.id}
+              currentUserEmail={session.user.email || ''}
+            />
           </div>
 
           {/* Metadata Panel */}
