@@ -3,15 +3,19 @@
  * =============================================================================
  * View, filter, search, and manage all appointments
  * Update appointment status and view details
+ * Now with bulk operations support
  *
  * Last Updated: 2025-10-31
- * Phase: 4 - Admin Dashboard
+ * Phase: 4 - Admin Dashboard (Sprint 3)
  * =============================================================================
  */
 
 import { getAdminSession, createServiceClient } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { AppointmentsTable } from '@/components/admin/AppointmentsTable';
+import { ExportCSVButton } from '@/components/admin/ExportCSVButton';
+import { AdvancedFilters } from '@/components/admin/AdvancedFilters';
 
 // Force dynamic rendering for this page (uses cookies for authentication)
 export const dynamic = 'force-dynamic';
@@ -19,7 +23,14 @@ export const dynamic = 'force-dynamic';
 export default async function AdminAppointmentsPage({
   searchParams,
 }: {
-  searchParams: { status?: string; search?: string };
+  searchParams: {
+    status?: string;
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  };
 }) {
   // Verify admin session
   const session = await getAdminSession();
@@ -31,11 +42,15 @@ export default async function AdminAppointmentsPage({
   // Get filter parameters
   const statusFilter = searchParams.status;
   const searchQuery = searchParams.search;
+  const dateFrom = searchParams.dateFrom;
+  const dateTo = searchParams.dateTo;
+  const sortBy = searchParams.sortBy || 'created_at';
+  const sortOrder = searchParams.sortOrder || 'desc';
 
   // Fetch appointments with filters
   const supabase = createServiceClient();
 
-  let query = supabase.from('appointments').select('*').order('created_at', { ascending: false });
+  let query = supabase.from('appointments').select('*');
 
   // Apply status filter
   if (statusFilter && statusFilter !== 'all') {
@@ -46,6 +61,18 @@ export default async function AdminAppointmentsPage({
   if (searchQuery) {
     query = query.or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
   }
+
+  // Apply date range filters
+  if (dateFrom) {
+    query = query.gte('created_at', `${dateFrom}T00:00:00`);
+  }
+  if (dateTo) {
+    query = query.lte('created_at', `${dateTo}T23:59:59`);
+  }
+
+  // Apply sorting
+  const ascending = sortOrder === 'asc';
+  query = query.order(sortBy, { ascending });
 
   const { data: appointments, error } = await query;
 
@@ -81,10 +108,11 @@ export default async function AdminAppointmentsPage({
           <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
           <p className="mt-2 text-gray-600">Manage and track all appointment bookings</p>
         </div>
+        <ExportCSVButton appointments={appointments || []} statusFilter={statusFilter} />
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-6 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
@@ -128,132 +156,17 @@ export default async function AdminAppointmentsPage({
             />
           </div>
         </div>
+
+        {/* Advanced Filters */}
+        <AdvancedFilters />
       </div>
 
-      {/* Appointments Table */}
-      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Client
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Budget
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {appointments && appointments.length > 0 ? (
-                appointments.map((appointment) => (
-                  <tr key={appointment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {appointment.full_name}
-                        </div>
-                        {appointment.company_name && (
-                          <div className="text-sm text-gray-500">{appointment.company_name}</div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{appointment.email}</div>
-                      {appointment.phone && (
-                        <div className="text-sm text-gray-500">{appointment.phone}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {appointment.project_type}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {appointment.budget_range}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          appointment.status === 'completed'
-                            ? 'bg-green-100 text-green-800'
-                            : appointment.status === 'confirmed'
-                              ? 'bg-blue-100 text-blue-800'
-                              : appointment.status === 'cancelled'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        {appointment.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(appointment.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        href={`/admin/appointments/${appointment.id}`}
-                        className="text-emerald-600 hover:text-emerald-900"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <svg
-                        className="w-12 h-12 text-gray-400 mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      <p className="text-lg font-medium">No appointments found</p>
-                      <p className="text-sm mt-1">
-                        {searchQuery || statusFilter !== 'all'
-                          ? 'Try adjusting your filters'
-                          : 'Appointments will appear here when clients book'}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination (placeholder) */}
-        {appointments && appointments.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Showing {appointments.length} appointment
-              {appointments.length !== 1 ? 's' : ''}
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Appointments Table with Bulk Actions */}
+      <AppointmentsTable
+        appointments={appointments || []}
+        searchQuery={searchQuery}
+        statusFilter={statusFilter}
+      />
     </div>
   );
 }

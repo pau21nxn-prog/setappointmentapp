@@ -2,9 +2,10 @@
  * Admin Email Templates
  * =============================================================================
  * Email templates for sending emails to clients from admin panel
+ * Now with configurable branding via environment variables
  *
  * Last Updated: 2025-10-31
- * Phase: 4 - Admin Dashboard (Sprint 2)
+ * Phase: 4 - Admin Dashboard (Sprint 3)
  * =============================================================================
  */
 
@@ -17,10 +18,22 @@ interface AppointmentData {
 }
 
 /**
+ * Get email branding configuration from environment variables
+ * Falls back to sensible defaults if not configured
+ */
+function getEmailBranding() {
+  return {
+    companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || process.env.COMPANY_NAME || 'Our Team',
+    fromName: process.env.EMAIL_FROM_NAME || process.env.NEXT_PUBLIC_COMPANY_NAME || 'The Team',
+  };
+}
+
+/**
  * Status Confirmation Email Template
  * Sent when admin changes appointment status to confirmed
  */
 export function getStatusConfirmationTemplate(appointmentData: AppointmentData): string {
+  const branding = getEmailBranding();
   return `
 <!DOCTYPE html>
 <html>
@@ -53,7 +66,7 @@ export function getStatusConfirmationTemplate(appointmentData: AppointmentData):
 
     <p style="font-size: 16px; color: #6B7280; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
       Best regards,<br>
-      <strong>The Team</strong>
+      <strong>${branding.fromName}</strong>
     </p>
   </div>
 </body>
@@ -69,6 +82,7 @@ export function getRescheduleRequestTemplate(
   appointmentData: AppointmentData,
   reason?: string
 ): string {
+  const branding = getEmailBranding();
   return `
 <!DOCTYPE html>
 <html>
@@ -110,7 +124,7 @@ export function getRescheduleRequestTemplate(
 
     <p style="font-size: 16px; color: #6B7280; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
       Best regards,<br>
-      <strong>The Team</strong>
+      <strong>${branding.fromName}</strong>
     </p>
   </div>
 </body>
@@ -127,6 +141,7 @@ export function getCustomMessageTemplate(
   subject: string,
   message: string
 ): string {
+  const branding = getEmailBranding();
   return `
 <!DOCTYPE html>
 <html>
@@ -148,7 +163,7 @@ export function getCustomMessageTemplate(
 
     <p style="font-size: 16px; color: #6B7280; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
       Best regards,<br>
-      <strong>The Team</strong>
+      <strong>${branding.fromName}</strong>
     </p>
   </div>
 </body>
@@ -165,6 +180,7 @@ export function getProjectUpdateTemplate(
   updateTitle: string,
   updateDetails: string
 ): string {
+  const branding = getEmailBranding();
   return `
 <!DOCTYPE html>
 <html>
@@ -195,7 +211,7 @@ export function getProjectUpdateTemplate(
 
     <p style="font-size: 16px; color: #6B7280; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
       Best regards,<br>
-      <strong>The Team</strong>
+      <strong>${branding.fromName}</strong>
     </p>
   </div>
 </body>
@@ -240,14 +256,16 @@ export function getEmailTemplate(
         ),
       };
     case 'custom':
-    default:
+    default: {
+      const branding = getEmailBranding();
       return {
-        subject: options?.subject || 'Message from The Team',
+        subject: options?.subject || `Message from ${branding.companyName}`,
         html: getCustomMessageTemplate(
           appointmentData,
-          options?.subject || 'Message from The Team',
+          options?.subject || `Message from ${branding.companyName}`,
           options?.message || ''
         ),
       };
+    }
   }
 }

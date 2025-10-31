@@ -15,6 +15,7 @@ import { StatusUpdateButton } from '@/components/admin/StatusUpdateButton';
 import { AddNoteButton } from '@/components/admin/AddNoteButton';
 import { NotesSection } from '@/components/admin/NotesSection';
 import { SendEmailButton } from '@/components/admin/SendEmailButton';
+import { CalendarSyncButton } from '@/components/admin/CalendarSyncButton';
 
 // Force dynamic rendering for this page (uses cookies for authentication)
 export const dynamic = 'force-dynamic';
@@ -307,7 +308,13 @@ export default async function AppointmentDetailPage({ params }: AppointmentDetai
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
 
             <div className="space-y-3">
-              <SendEmailButton appointmentId={appointment.id} />
+              <SendEmailButton appointmentId={appointment.id} appointmentData={appointment} />
+              <CalendarSyncButton
+                appointmentId={appointment.id}
+                adminEmail={session.user.email!}
+                googleEventId={appointment.google_calendar_event_id}
+                outlookEventId={appointment.outlook_calendar_event_id}
+              />
               <StatusUpdateButton
                 appointmentId={appointment.id}
                 currentStatus={appointment.status}

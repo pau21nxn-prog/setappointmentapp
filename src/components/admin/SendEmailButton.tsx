@@ -4,18 +4,21 @@
  * Send Email Button Component
  * =============================================================================
  * Client component for sending emails to appointment clients
+ * Now includes email preview before sending
  *
  * Last Updated: 2025-10-31
- * Phase: 4 - Admin Dashboard (Sprint 2)
+ * Phase: 4 - Admin Dashboard (Sprint 3)
  * =============================================================================
  */
 
 import { useState } from 'react';
 import { sendAppointmentEmail } from '@/app/admin/actions';
 import type { EmailTemplateType } from '@/lib/email/adminTemplates';
+import { EmailPreviewModal } from './EmailPreviewModal';
 
 interface SendEmailButtonProps {
   appointmentId: string;
+  appointmentData?: any; // Full appointment object for preview
 }
 
 const emailTemplates: { value: EmailTemplateType; label: string; description: string }[] = [
@@ -41,8 +44,9 @@ const emailTemplates: { value: EmailTemplateType; label: string; description: st
   },
 ];
 
-export function SendEmailButton({ appointmentId }: SendEmailButtonProps) {
+export function SendEmailButton({ appointmentId, appointmentData }: SendEmailButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplateType | null>(null);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
@@ -52,6 +56,11 @@ export function SendEmailButton({ appointmentId }: SendEmailButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const handleShowPreview = () => {
+    if (!canSend()) return;
+    setShowPreview(true);
+  };
 
   const handleSendEmail = async () => {
     if (!selectedTemplate) return;
@@ -75,6 +84,7 @@ export function SendEmailButton({ appointmentId }: SendEmailButtonProps) {
 
       if (result.success) {
         setSuccess(result.message);
+        setShowPreview(false);
         setTimeout(() => {
           setIsOpen(false);
           setSelectedTemplate(null);
@@ -87,10 +97,12 @@ export function SendEmailButton({ appointmentId }: SendEmailButtonProps) {
         }, 2000);
       } else {
         setError(result.error || result.message);
+        setShowPreview(false);
       }
     } catch (err) {
       setError('An unexpected error occurred');
       console.error('Send email error:', err);
+      setShowPreview(false);
     } finally {
       setIsLoading(false);
     }
@@ -258,41 +270,48 @@ export function SendEmailButton({ appointmentId }: SendEmailButtonProps) {
                 Cancel
               </button>
               <button
-                onClick={handleSendEmail}
+                onClick={handleShowPreview}
                 disabled={!canSend() || isLoading}
-                className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <span className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Sending...
-                  </span>
-                ) : (
-                  'Send Email'
-                )}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                Preview Email
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Email Preview Modal */}
+      {appointmentData && (
+        <EmailPreviewModal
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          onConfirm={handleSendEmail}
+          templateType={selectedTemplate!}
+          appointmentData={appointmentData}
+          customData={{
+            subject,
+            message,
+            reason,
+            updateTitle,
+            updateDetails,
+          }}
+          isLoading={isLoading}
+        />
       )}
     </>
   );
