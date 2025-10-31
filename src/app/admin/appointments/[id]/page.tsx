@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { StatusUpdateButton } from '@/components/admin/StatusUpdateButton';
 import { AddNoteButton } from '@/components/admin/AddNoteButton';
 import { NotesSection } from '@/components/admin/NotesSection';
+import { SendEmailButton } from '@/components/admin/SendEmailButton';
 
 // Force dynamic rendering for this page (uses cookies for authentication)
 export const dynamic = 'force-dynamic';
@@ -306,9 +307,7 @@ export default async function AppointmentDetailPage({ params }: AppointmentDetai
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
 
             <div className="space-y-3">
-              <button className="w-full px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium">
-                Send Email
-              </button>
+              <SendEmailButton appointmentId={appointment.id} />
               <StatusUpdateButton
                 appointmentId={appointment.id}
                 currentStatus={appointment.status}

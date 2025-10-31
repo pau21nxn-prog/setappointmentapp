@@ -16,6 +16,8 @@
 import { signOutAdmin, getAdminSession, createServiceClient } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { Resend } from 'resend';
+import { getEmailTemplate, EmailTemplateType } from '@/lib/email/adminTemplates';
 
 // Type definitions
 type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -36,6 +38,13 @@ interface AddNoteResult {
 interface DeleteNoteResult {
   success: boolean;
   message: string;
+  error?: string;
+}
+
+interface SendEmailResult {
+  success: boolean;
+  message: string;
+  emailId?: string;
   error?: string;
 }
 
@@ -379,6 +388,122 @@ export async function deleteAppointmentNote(
     };
   } catch (error) {
     console.error('Error deleting appointment note:', error);
+    return {
+      success: false,
+      message: 'An error occurred',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Send email to appointment client
+ *
+ * @param appointmentId - UUID of the appointment
+ * @param templateType - Type of email template to use
+ * @param customData - Optional custom data for the template
+ * @returns Result object with success status and message
+ */
+export async function sendAppointmentEmail(
+  appointmentId: string,
+  templateType: EmailTemplateType,
+  customData?: {
+    subject?: string;
+    message?: string;
+    reason?: string;
+    updateTitle?: string;
+    updateDetails?: string;
+  }
+): Promise<SendEmailResult> {
+  try {
+    // Verify admin session
+    const session = await getAdminSession();
+    if (!session) {
+      return {
+        success: false,
+        message: 'Unauthorized',
+        error: 'You must be logged in as an admin to perform this action',
+      };
+    }
+
+    // Check for Resend API key
+    if (!process.env.RESEND_API_KEY) {
+      return {
+        success: false,
+        message: 'Email service not configured',
+        error: 'RESEND_API_KEY environment variable is missing',
+      };
+    }
+
+    const supabase = createServiceClient();
+
+    // Fetch appointment data
+    const { data: appointment, error: fetchError } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single();
+
+    if (fetchError || !appointment) {
+      return {
+        success: false,
+        message: 'Appointment not found',
+        error: fetchError?.message || 'Could not find appointment',
+      };
+    }
+
+    // Generate email template
+    const { subject, html } = getEmailTemplate(templateType, appointment, customData);
+
+    // Initialize Resend
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // Send email
+    const { data, error: sendError } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'noreply@example.com',
+      to: appointment.email,
+      replyTo: process.env.EMAIL_ADMIN || undefined,
+      subject,
+      html,
+    });
+
+    if (sendError) {
+      // Log email failure
+      await supabase.from('email_logs').insert({
+        appointment_id: appointmentId,
+        recipient_email: appointment.email,
+        email_type: 'admin_message',
+        status: 'failed',
+        error_message: sendError.message,
+      });
+
+      return {
+        success: false,
+        message: 'Failed to send email',
+        error: sendError.message,
+      };
+    }
+
+    // Log successful email
+    await supabase.from('email_logs').insert({
+      appointment_id: appointmentId,
+      recipient_email: appointment.email,
+      email_type: 'admin_message',
+      status: 'sent',
+      provider_message_id: data?.id,
+      sent_at: new Date().toISOString(),
+    });
+
+    // Revalidate appointment detail page
+    revalidatePath(`/admin/appointments/${appointmentId}`);
+
+    return {
+      success: true,
+      message: 'Email sent successfully',
+      emailId: data?.id,
+    };
+  } catch (error) {
+    console.error('Error sending appointment email:', error);
     return {
       success: false,
       message: 'An error occurred',
