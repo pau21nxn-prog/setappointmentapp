@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
 
     // Get base URL with smart fallback logic
     const baseUrl = getAppBaseUrl(request);
-    const redirectTo = `${baseUrl}/admin/auth/callback`;
+    // IMPORTANT: Redirect to API route (not page) so cookies can be set properly
+    const redirectTo = `${baseUrl}/api/admin/auth/callback`;
 
     console.log('[Magic Link] Sending magic link with redirect:', redirectTo);
 
