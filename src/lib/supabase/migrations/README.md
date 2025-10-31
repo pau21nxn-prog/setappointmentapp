@@ -9,6 +9,10 @@ Execute these SQL files in order in your Supabase SQL Editor:
 1. `001_create_appointments_table.sql` - Creates the appointments table
 2. `002_create_email_logs_table.sql` - Creates the email_logs table
 3. `003_create_rls_policies.sql` - Sets up Row Level Security policies
+4. `004_create_rate_limits_table.sql` - Creates rate limiting table (Supabase-based)
+5. `005_create_admin_users_table.sql` - Creates admin users table
+6. `006_create_status_history_table.sql` - Creates status history tracking (Phase 4)
+7. `007_create_appointment_notes_table.sql` - Creates appointment notes system (Phase 4)
 
 ## Tables
 
@@ -32,6 +36,33 @@ Tracks all email communications:
 - Delivery status (pending, sent, delivered, failed, bounced)
 - Provider details from Resend API
 - Error tracking and retry logic
+
+### admin_users (Phase 4)
+
+Stores admin user accounts for dashboard access:
+
+- Email-based authentication (magic link)
+- Role-based access control (viewer, admin, super_admin)
+- Last login tracking
+- Active/inactive status
+
+### status_history (Phase 4)
+
+Audit trail for appointment status changes:
+
+- Tracks all status transitions
+- Records who made the change
+- Optional reason for change
+- Immutable audit trail (no updates/deletes)
+
+### appointment_notes (Phase 4)
+
+Internal admin notes for appointments:
+
+- Private notes visible only to admins
+- Created by admin email tracking
+- Important flag for critical notes
+- Editable/deletable by note creator only
 
 ## Row Level Security (RLS)
 
