@@ -8,6 +8,7 @@
 
 import { Client } from '@microsoft/microsoft-graph-client';
 import type { Event } from '@microsoft/microsoft-graph-types';
+import { convertUTCOffsetToIANA } from '@/lib/utils/timezone';
 
 /**
  * Microsoft OAuth Configuration
@@ -90,9 +91,13 @@ export async function createOutlookCalendarEvent(
     endDateTime: string;
     attendeeEmail?: string;
     location?: string;
+    timezone?: string; // UTC offset format (e.g., "UTC +8 (Manila)")
   }
 ) {
   const client = createGraphClient(accessToken);
+
+  // Convert UTC offset format to IANA timezone if provided
+  const ianaTimezone = event.timezone ? convertUTCOffsetToIANA(event.timezone) : 'UTC';
 
   const calendarEvent: Event = {
     subject: event.summary,
@@ -102,11 +107,11 @@ export async function createOutlookCalendarEvent(
     },
     start: {
       dateTime: event.startDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     },
     end: {
       dateTime: event.endDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     },
     location: event.location
       ? {
@@ -143,9 +148,13 @@ export async function updateOutlookCalendarEvent(
     endDateTime?: string;
     attendeeEmail?: string;
     location?: string;
+    timezone?: string; // UTC offset format (e.g., "UTC +8 (Manila)")
   }
 ) {
   const client = createGraphClient(accessToken);
+
+  // Convert UTC offset format to IANA timezone if provided
+  const ianaTimezone = updates.timezone ? convertUTCOffsetToIANA(updates.timezone) : 'UTC';
 
   const event: Partial<Event> = {};
   if (updates.summary) event.subject = updates.summary;
@@ -158,13 +167,13 @@ export async function updateOutlookCalendarEvent(
   if (updates.startDateTime) {
     event.start = {
       dateTime: updates.startDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     };
   }
   if (updates.endDateTime) {
     event.end = {
       dateTime: updates.endDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     };
   }
   if (updates.location) {

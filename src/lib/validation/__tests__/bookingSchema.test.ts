@@ -168,7 +168,7 @@ describe('Scheduling Schema', () => {
     const validData = {
       preferred_date: tomorrowStr,
       preferred_time: 'morning',
-      timezone: 'America/New_York',
+      timezone: 'UTC -5 (New York)',
       video_call_platform: 'zoom',
       video_call_platform_other: '',
     };
@@ -184,7 +184,7 @@ describe('Scheduling Schema', () => {
     const invalidData = {
       preferred_date: yesterdayStr,
       preferred_time: 'morning',
-      timezone: 'America/New_York',
+      timezone: 'UTC -5 (New York)',
       video_call_platform: 'zoom',
     };
 
@@ -197,7 +197,7 @@ describe('Scheduling Schema', () => {
     const validData = {
       preferred_date: today,
       preferred_time: 'afternoon',
-      timezone: 'America/Los_Angeles',
+      timezone: 'UTC -8 (Los Angeles)',
       video_call_platform: 'google-meet',
       video_call_platform_other: '',
     };
@@ -212,7 +212,7 @@ describe('Scheduling Schema', () => {
       const validData = {
         preferred_date: today,
         preferred_time: time,
-        timezone: 'UTC',
+        timezone: 'UTC +0 (London)',
         video_call_platform: 'zoom',
         video_call_platform_other: '',
       };
@@ -227,7 +227,7 @@ describe('Scheduling Schema', () => {
       const validData = {
         preferred_date: today,
         preferred_time: 'morning',
-        timezone: 'America/Chicago',
+        timezone: 'UTC -6 (Chicago)',
         video_call_platform: platform,
         video_call_platform_other: '',
       };
@@ -241,7 +241,7 @@ describe('Scheduling Schema', () => {
     const validData = {
       preferred_date: today,
       preferred_time: 'morning',
-      timezone: 'UTC',
+      timezone: 'UTC +0 (London)',
       video_call_platform: 'other',
       video_call_platform_other: 'Skype',
     };
@@ -255,7 +255,7 @@ describe('Scheduling Schema', () => {
     const validData = {
       preferred_date: today,
       preferred_time: 'morning',
-      timezone: 'UTC',
+      timezone: 'UTC +0 (London)',
       video_call_platform: 'zoom',
       video_call_platform_other: '',
     };
@@ -290,7 +290,7 @@ describe('Complete Booking Form Schema', () => {
       // Scheduling
       preferred_date: tomorrowStr,
       preferred_time: 'morning',
-      timezone: 'America/New_York',
+      timezone: 'UTC -5 (New York)',
       video_call_platform: 'zoom',
       video_call_platform_other: '',
     };
@@ -323,7 +323,7 @@ describe('Complete Booking Form Schema', () => {
       // Scheduling
       preferred_date: tomorrowStr,
       preferred_time: 'afternoon',
-      timezone: 'Europe/London',
+      timezone: 'UTC +0 (London)',
       video_call_platform: 'teams',
       video_call_platform_other: '',
     };

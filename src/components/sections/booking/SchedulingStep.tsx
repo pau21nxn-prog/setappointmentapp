@@ -1,5 +1,5 @@
-import React from 'react';
-import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import DatePicker from '@/components/ui/DatePicker';
 import Select from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
@@ -9,16 +9,32 @@ import {
   VIDEO_CALL_PLATFORM_OPTIONS,
   TIMEZONE_OPTIONS,
 } from '@/constants/formOptions';
+import { detectUserTimezone } from '@/lib/utils/timezone';
 import { Calendar, Clock, Video } from 'lucide-react';
 
 export interface SchedulingStepProps {
   register: UseFormRegister<BookingFormData>;
   errors: FieldErrors<BookingFormData>;
   watch: UseFormWatch<BookingFormData>;
+  setValue: UseFormSetValue<BookingFormData>;
 }
 
-const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors, watch }) => {
+const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors, watch, setValue }) => {
   const selectedPlatform = watch('video_call_platform');
+  const currentTimezone = watch('timezone');
+
+  // Auto-detect user's timezone on component mount
+  useEffect(() => {
+    // Only auto-detect if timezone hasn't been set yet or is still in IANA format
+    if (!currentTimezone || currentTimezone.includes('/')) {
+      const detectedTimezone = detectUserTimezone();
+      if (detectedTimezone) {
+        setValue('timezone', detectedTimezone, { shouldValidate: false });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only run on mount
+
   return (
     <div className="space-y-6">
       <div>

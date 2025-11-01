@@ -7,6 +7,7 @@
  */
 
 import { google } from 'googleapis';
+import { convertUTCOffsetToIANA } from '@/lib/utils/timezone';
 
 /**
  * Google OAuth 2.0 Configuration
@@ -65,6 +66,7 @@ export async function createGoogleCalendarEvent(
     endDateTime: string;
     attendeeEmail?: string;
     location?: string;
+    timezone?: string; // UTC offset format (e.g., "UTC +8 (Manila)")
   }
 ) {
   const oauth2Client = getGoogleOAuthClient();
@@ -75,17 +77,20 @@ export async function createGoogleCalendarEvent(
 
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+  // Convert UTC offset format to IANA timezone if provided
+  const ianaTimezone = event.timezone ? convertUTCOffsetToIANA(event.timezone) : 'UTC';
+
   const calendarEvent = {
     summary: event.summary,
     description: event.description,
     location: event.location,
     start: {
       dateTime: event.startDateTime,
-      timeZone: 'America/New_York', // TODO: Make configurable
+      timeZone: ianaTimezone,
     },
     end: {
       dateTime: event.endDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     },
     attendees: event.attendeeEmail ? [{ email: event.attendeeEmail }] : [],
     reminders: {
@@ -120,6 +125,7 @@ export async function updateGoogleCalendarEvent(
     endDateTime?: string;
     attendeeEmail?: string;
     location?: string;
+    timezone?: string; // UTC offset format (e.g., "UTC +8 (Manila)")
   }
 ) {
   const oauth2Client = getGoogleOAuthClient();
@@ -130,6 +136,9 @@ export async function updateGoogleCalendarEvent(
 
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+  // Convert UTC offset format to IANA timezone if provided
+  const ianaTimezone = updates.timezone ? convertUTCOffsetToIANA(updates.timezone) : 'UTC';
+
   const event: Record<string, unknown> = {};
   if (updates.summary) event.summary = updates.summary;
   if (updates.description) event.description = updates.description;
@@ -137,13 +146,13 @@ export async function updateGoogleCalendarEvent(
   if (updates.startDateTime) {
     event.start = {
       dateTime: updates.startDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     };
   }
   if (updates.endDateTime) {
     event.end = {
       dateTime: updates.endDateTime,
-      timeZone: 'America/New_York',
+      timeZone: ianaTimezone,
     };
   }
   if (updates.attendeeEmail) {
