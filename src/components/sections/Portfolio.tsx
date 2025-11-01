@@ -175,7 +175,9 @@ const Portfolio: React.FC = () => {
 
         {/* CTA */}
         <div className="text-center mt-16">
-          <p className="text-gray-600 mb-6">Ready to start your project?</p>
+          <p className="text-gray-600 mb-6">
+            81% of customers research a business online before making a deal
+          </p>
           <a
             href="#booking"
             className="inline-flex items-center px-6 py-3 bg-gradient-emerald text-white rounded-lg hover:opacity-90 transition-opacity font-medium"

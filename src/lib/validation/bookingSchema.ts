@@ -7,11 +7,23 @@ import { z } from 'zod';
 
 // Step 1: Personal Information Schema
 export const personalInfoSchema = z.object({
-  full_name: z
+  first_name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(255, 'Name must be less than 255 characters')
-    .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
+    .min(2, 'First name must be at least 2 characters')
+    .max(255, 'First name must be less than 255 characters')
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      'First name can only contain letters, spaces, hyphens, and apostrophes'
+    ),
+
+  last_name: z
+    .string()
+    .min(2, 'Last name must be at least 2 characters')
+    .max(255, 'Last name must be less than 255 characters')
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      'Last name can only contain letters, spaces, hyphens, and apostrophes'
+    ),
 
   email: z
     .string()
@@ -19,11 +31,7 @@ export const personalInfoSchema = z.object({
     .email('Please enter a valid email address')
     .max(255, 'Email must be less than 255 characters'),
 
-  phone: z
-    .string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .max(50, 'Phone number is too long')
-    .regex(/^[\d\s\-\(\)\+]+$/, 'Please enter a valid phone number'),
+  phone: z.string().min(1, 'Phone number is required').max(50, 'Phone number is too long'),
 
   company_name: z
     .string()
@@ -31,6 +39,12 @@ export const personalInfoSchema = z.object({
     .max(255, 'Company name must be less than 255 characters'),
 
   industry: z.string().min(1, 'Please select an industry'),
+
+  industry_other: z
+    .string()
+    .max(255, 'Industry must be less than 255 characters')
+    .optional()
+    .or(z.literal('')),
 
   website_url: z
     .string()
@@ -50,10 +64,6 @@ export const projectDetailsSchema = z.object({
     .string()
     .min(20, 'Please provide at least 20 characters describing your project')
     .max(2000, 'Description must be less than 2000 characters'),
-
-  budget_range: z.string().min(1, 'Please select a budget range'),
-
-  timeline: z.string().min(1, 'Please select a timeline'),
 
   features: z
     .array(z.string())
@@ -88,7 +98,7 @@ export const schedulingSchema = z.object({
 
   preferred_time: z.string().min(1, 'Please select a preferred time'),
 
-  timezone: z.string().min(1, 'Please select your timezone'),
+  video_call_platform: z.string().min(1, 'Please select a video call platform'),
 });
 
 // Combined Schema for Complete Form Validation

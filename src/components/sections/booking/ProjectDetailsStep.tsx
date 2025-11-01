@@ -5,8 +5,6 @@ import Textarea from '@/components/ui/Textarea';
 import { BookingFormData } from '@/lib/validation/bookingSchema';
 import {
   PROJECT_TYPE_OPTIONS,
-  BUDGET_RANGE_OPTIONS,
-  TIMELINE_OPTIONS,
   REFERRAL_SOURCE_OPTIONS,
   FEATURE_OPTIONS,
 } from '@/constants/formOptions';
@@ -44,24 +42,6 @@ const ProjectDetailsStep: React.FC<ProjectDetailsStepProps> = ({ register, error
         placeholder="Please describe your project, goals, and any specific requirements..."
         helperText="Minimum 20 characters"
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Select
-          label="Budget Range"
-          {...register('budget_range')}
-          error={errors.budget_range?.message}
-          options={BUDGET_RANGE_OPTIONS}
-          required
-        />
-
-        <Select
-          label="Timeline"
-          {...register('timeline')}
-          error={errors.timeline?.message}
-          options={TIMELINE_OPTIONS}
-          required
-        />
-      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">

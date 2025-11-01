@@ -50,6 +50,7 @@ const BookingForm: React.FC = () => {
     handleSubmit,
     watch,
     trigger,
+    setValue,
     formState: { errors },
     getValues,
     reset,
@@ -57,23 +58,23 @@ const BookingForm: React.FC = () => {
     resolver: zodResolver(bookingFormSchema),
     mode: 'onBlur',
     defaultValues: {
-      full_name: '',
+      first_name: '',
+      last_name: '',
       email: '',
       phone: '',
       company_name: '',
       industry: '',
+      industry_other: '',
       website_url: '',
       current_website: false,
       project_type: '',
       project_description: '',
-      budget_range: '',
-      timeline: '',
       features: [],
       additional_notes: '',
       referral_source: '',
       preferred_date: '',
       preferred_time: '',
-      timezone: '',
+      video_call_platform: '',
       website: '', // Honeypot field for spam detection
     },
   });
@@ -138,8 +139,8 @@ const BookingForm: React.FC = () => {
     const isValid = await validateCurrentStep();
     if (isValid && currentStep < formSteps.length - 1) {
       setCurrentStep((prev) => prev + 1);
-      // Scroll to top of form
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to booking section instead of top of page
+      document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -147,7 +148,8 @@ const BookingForm: React.FC = () => {
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to booking section instead of top of page
+      document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -191,7 +193,6 @@ const BookingForm: React.FC = () => {
         email: data.email,
         company_name: data.company_name,
         project_type: data.project_type,
-        budget_range: data.budget_range,
       });
 
       // Redirect to confirmation page with appointment details
@@ -209,7 +210,9 @@ const BookingForm: React.FC = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <PersonalInfoStep register={register} errors={errors} />;
+        return (
+          <PersonalInfoStep register={register} errors={errors} watch={watch} setValue={setValue} />
+        );
       case 1:
         return <ProjectDetailsStep register={register} errors={errors} watch={watch} />;
       case 2:

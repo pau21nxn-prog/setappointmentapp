@@ -8,11 +8,13 @@ import {
 describe('Personal Info Schema', () => {
   it('validates correct personal info data', () => {
     const validData = {
-      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'john@example.com',
-      phone: '1234567890',
+      phone: '+12345678901',
       company_name: 'Tech Corp',
       industry: 'technology',
+      industry_other: '',
       website_url: 'https://example.com',
       current_website: true,
     };
@@ -22,9 +24,10 @@ describe('Personal Info Schema', () => {
 
   it('rejects invalid email', () => {
     const invalidData = {
-      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'invalid-email',
-      phone: '1234567890',
+      phone: '+12345678901',
       company_name: 'Tech Corp',
       industry: 'technology',
       current_website: false,
@@ -33,11 +36,12 @@ describe('Personal Info Schema', () => {
     expect(() => personalInfoSchema.parse(invalidData)).toThrow();
   });
 
-  it('rejects short name', () => {
+  it('rejects short first name', () => {
     const invalidData = {
-      full_name: 'J',
+      first_name: 'J',
+      last_name: 'Doe',
       email: 'john@example.com',
-      phone: '1234567890',
+      phone: '+12345678901',
       company_name: 'Tech Corp',
       industry: 'technology',
       current_website: false,
@@ -46,11 +50,26 @@ describe('Personal Info Schema', () => {
     expect(() => personalInfoSchema.parse(invalidData)).toThrow();
   });
 
-  it('rejects invalid phone number', () => {
+  it('rejects short last name', () => {
     const invalidData = {
-      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'D',
       email: 'john@example.com',
-      phone: '123',
+      phone: '+12345678901',
+      company_name: 'Tech Corp',
+      industry: 'technology',
+      current_website: false,
+    };
+
+    expect(() => personalInfoSchema.parse(invalidData)).toThrow();
+  });
+
+  it('rejects empty phone number', () => {
+    const invalidData = {
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      phone: '',
       company_name: 'Tech Corp',
       industry: 'technology',
       current_website: false,
@@ -61,11 +80,29 @@ describe('Personal Info Schema', () => {
 
   it('accepts empty website URL', () => {
     const validData = {
-      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'john@example.com',
-      phone: '1234567890',
+      phone: '+12345678901',
       company_name: 'Tech Corp',
       industry: 'technology',
+      industry_other: '',
+      website_url: '',
+      current_website: false,
+    };
+
+    expect(() => personalInfoSchema.parse(validData)).not.toThrow();
+  });
+
+  it('accepts industry_other when industry is "other"', () => {
+    const validData = {
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      phone: '+12345678901',
+      company_name: 'Tech Corp',
+      industry: 'other',
+      industry_other: 'Custom Industry',
       website_url: '',
       current_website: false,
     };
@@ -79,8 +116,6 @@ describe('Project Details Schema', () => {
     const validData = {
       project_type: 'new-website',
       project_description: 'We need a modern website for our business',
-      budget_range: '5k-10k',
-      timeline: '1-2-months',
       features: ['contact-forms', 'blog'],
       additional_notes: 'Looking forward to working together',
       referral_source: 'google-search',
@@ -93,8 +128,6 @@ describe('Project Details Schema', () => {
     const invalidData = {
       project_type: 'new-website',
       project_description: 'Too short',
-      budget_range: '5k-10k',
-      timeline: '1-2-months',
       features: ['contact-forms'],
       referral_source: 'google-search',
     };
@@ -106,8 +139,6 @@ describe('Project Details Schema', () => {
     const invalidData = {
       project_type: 'new-website',
       project_description: 'We need a modern website for our business',
-      budget_range: '5k-10k',
-      timeline: '1-2-months',
       features: [],
       referral_source: 'google-search',
     };
@@ -119,8 +150,6 @@ describe('Project Details Schema', () => {
     const validData = {
       project_type: 'new-website',
       project_description: 'We need a modern website for our business',
-      budget_range: '5k-10k',
-      timeline: '1-2-months',
       features: ['contact-forms'],
       additional_notes: '',
       referral_source: 'google-search',
@@ -138,8 +167,8 @@ describe('Scheduling Schema', () => {
 
     const validData = {
       preferred_date: tomorrowStr,
-      preferred_time: '10am-11am',
-      timezone: 'America/New_York',
+      preferred_time: 'morning',
+      video_call_platform: 'zoom',
     };
 
     expect(() => schedulingSchema.parse(validData)).not.toThrow();
@@ -152,8 +181,8 @@ describe('Scheduling Schema', () => {
 
     const invalidData = {
       preferred_date: yesterdayStr,
-      preferred_time: '10am-11am',
-      timezone: 'America/New_York',
+      preferred_time: 'morning',
+      video_call_platform: 'zoom',
     };
 
     expect(() => schedulingSchema.parse(invalidData)).toThrow();
@@ -164,11 +193,37 @@ describe('Scheduling Schema', () => {
 
     const validData = {
       preferred_date: today,
-      preferred_time: '10am-11am',
-      timezone: 'America/New_York',
+      preferred_time: 'afternoon',
+      video_call_platform: 'google-meet',
     };
 
     expect(() => schedulingSchema.parse(validData)).not.toThrow();
+  });
+
+  it('validates all time options', () => {
+    const today = new Date().toISOString().split('T')[0];
+
+    ['morning', 'afternoon', 'night'].forEach((time) => {
+      const validData = {
+        preferred_date: today,
+        preferred_time: time,
+        video_call_platform: 'zoom',
+      };
+      expect(() => schedulingSchema.parse(validData)).not.toThrow();
+    });
+  });
+
+  it('validates all video call platforms', () => {
+    const today = new Date().toISOString().split('T')[0];
+
+    ['zoom', 'google-meet', 'webex', 'other'].forEach((platform) => {
+      const validData = {
+        preferred_date: today,
+        preferred_time: 'morning',
+        video_call_platform: platform,
+      };
+      expect(() => schedulingSchema.parse(validData)).not.toThrow();
+    });
   });
 });
 
@@ -180,25 +235,25 @@ describe('Complete Booking Form Schema', () => {
 
     const validData = {
       // Personal Info
-      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'john@example.com',
-      phone: '1234567890',
+      phone: '+12345678901',
       company_name: 'Tech Corp',
       industry: 'technology',
+      industry_other: '',
       website_url: 'https://example.com',
       current_website: true,
       // Project Details
       project_type: 'new-website',
       project_description: 'We need a modern website for our business',
-      budget_range: '5k-10k',
-      timeline: '1-2-months',
       features: ['contact-forms', 'blog'],
       additional_notes: 'Looking forward to working together',
       referral_source: 'google-search',
       // Scheduling
       preferred_date: tomorrowStr,
-      preferred_time: '10am-11am',
-      timezone: 'America/New_York',
+      preferred_time: 'morning',
+      video_call_platform: 'zoom',
     };
 
     expect(() => bookingFormSchema.parse(validData)).not.toThrow();
@@ -206,7 +261,8 @@ describe('Complete Booking Form Schema', () => {
 
   it('rejects incomplete booking form data', () => {
     const invalidData = {
-      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'john@example.com',
       // Missing required fields
     };

@@ -3,8 +3,8 @@ import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import DatePicker from '@/components/ui/DatePicker';
 import Select from '@/components/ui/Select';
 import { BookingFormData } from '@/lib/validation/bookingSchema';
-import { PREFERRED_TIME_OPTIONS, TIMEZONE_OPTIONS } from '@/constants/formOptions';
-import { Calendar, Clock } from 'lucide-react';
+import { PREFERRED_TIME_OPTIONS, VIDEO_CALL_PLATFORM_OPTIONS } from '@/constants/formOptions';
+import { Calendar, Clock, Video } from 'lucide-react';
 
 export interface SchedulingStepProps {
   register: UseFormRegister<BookingFormData>;
@@ -57,19 +57,20 @@ const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors }) => 
         error={errors.preferred_time?.message}
         options={PREFERRED_TIME_OPTIONS}
         required
+        helperText="Choose your preferred time of day for the consultation"
       />
 
       <Select
-        label="Timezone"
-        {...register('timezone')}
-        error={errors.timezone?.message}
-        options={TIMEZONE_OPTIONS}
+        label="Video Call Platform"
+        {...register('video_call_platform')}
+        error={errors.video_call_platform?.message}
+        options={VIDEO_CALL_PLATFORM_OPTIONS}
         required
-        helperText="All times will be converted to your timezone"
+        helperText="Select your preferred platform for the video consultation"
       />
 
       {/* Quick Selection Helpers */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
         <div className="flex items-center p-4 bg-gray-50 rounded-lg">
           <Calendar className="h-8 w-8 text-emerald-600 mr-3" />
           <div>
@@ -85,6 +86,14 @@ const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors }) => 
           <div>
             <p className="text-sm font-medium text-gray-900">Quick Response</p>
             <p className="text-xs text-gray-600">We'll confirm your appointment within 24 hours.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <Video className="h-8 w-8 text-emerald-600 mr-3" />
+          <div>
+            <p className="text-sm font-medium text-gray-900">Video Call Ready</p>
+            <p className="text-xs text-gray-600">We'll send you a meeting link before the call.</p>
           </div>
         </div>
       </div>

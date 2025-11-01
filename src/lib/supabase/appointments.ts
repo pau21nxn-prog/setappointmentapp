@@ -45,23 +45,23 @@ export async function createAppointment(
     const supabase = createServerClient();
 
     const appointmentData = {
-      full_name: data.full_name,
+      full_name: `${data.first_name} ${data.last_name}`,
       email: data.email,
       phone: data.phone,
       company_name: data.company_name,
-      industry: data.industry,
+      industry: data.industry === 'other' ? data.industry_other || 'Other' : data.industry,
       website_url: data.website_url || null,
       current_website: data.current_website,
       project_type: data.project_type,
       project_description: data.project_description,
-      budget_range: data.budget_range,
-      timeline: data.timeline,
+      budget_range: 'not-specified', // Default value since field removed from form
+      timeline: 'flexible', // Default value since field removed from form
       features: data.features,
       additional_notes: data.additional_notes || null,
       referral_source: data.referral_source,
       preferred_date: data.preferred_date,
       preferred_time: data.preferred_time,
-      timezone: data.timezone,
+      timezone: 'UTC', // Default value since field removed from form
       status: 'pending' as const,
       ip_address: data.ip_address || null,
       user_agent: data.user_agent || null,

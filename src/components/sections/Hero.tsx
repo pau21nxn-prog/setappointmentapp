@@ -30,21 +30,21 @@ const Hero: React.FC = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300"></span>
             </span>
-            <span>15-Day Delivery Guarantee</span>
+            <span>Delivery Guaranteed</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Launch your Business
+            Launch your Professional
             <br />
             <span className="bg-gradient-to-r from-emerald-200 to-white bg-clip-text text-transparent">
-              Website now!
+              Business Website now!
             </span>
           </h1>
 
           {/* Subheading */}
           <p className="text-xl sm:text-2xl text-gray-100 mb-10 max-w-3xl mx-auto">
-            Deploy your Business Website in 15 days or get your money back.
+            75% of consumers judge a company's credibility based on its website design.
           </p>
 
           {/* CTA Buttons */}
@@ -108,7 +108,7 @@ const Hero: React.FC = () => {
                   d="M13 10V3L4 14h7v7l9-11h-7z"
                 />
               </svg>
-              <span className="text-sm">Fast 15-Day Delivery</span>
+              <span className="text-sm">Delivery Guaranteed</span>
             </div>
           </div>
         </div>

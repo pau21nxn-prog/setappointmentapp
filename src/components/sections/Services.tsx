@@ -71,7 +71,10 @@ const Services: React.FC = () => {
 
         {/* CTA */}
         <div className="text-center mt-16">
-          <p className="text-gray-600 mb-6">Not sure which service is right for you?</p>
+          <p className="text-gray-600 mb-6">
+            79% of entrepreneurs with a business website expect to grow at least 25% in the next 3-5
+            years
+          </p>
           <a
             href="#booking"
             className="inline-flex items-center px-6 py-3 bg-gradient-emerald text-white rounded-lg hover:opacity-90 transition-opacity font-medium"

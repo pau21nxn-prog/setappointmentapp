@@ -52,25 +52,16 @@ export const TIMELINE_OPTIONS: SelectOption[] = [
 ];
 
 export const PREFERRED_TIME_OPTIONS: SelectOption[] = [
-  { value: '9am-10am', label: '9:00 AM - 10:00 AM' },
-  { value: '10am-11am', label: '10:00 AM - 11:00 AM' },
-  { value: '11am-12pm', label: '11:00 AM - 12:00 PM' },
-  { value: '12pm-1pm', label: '12:00 PM - 1:00 PM' },
-  { value: '1pm-2pm', label: '1:00 PM - 2:00 PM' },
-  { value: '2pm-3pm', label: '2:00 PM - 3:00 PM' },
-  { value: '3pm-4pm', label: '3:00 PM - 4:00 PM' },
-  { value: '4pm-5pm', label: '4:00 PM - 5:00 PM' },
-  { value: '5pm-6pm', label: '5:00 PM - 6:00 PM' },
+  { value: 'morning', label: 'Morning' },
+  { value: 'afternoon', label: 'Afternoon' },
+  { value: 'night', label: 'Night' },
 ];
 
-export const TIMEZONE_OPTIONS: SelectOption[] = [
-  { value: 'America/New_York', label: 'Eastern Time (ET)' },
-  { value: 'America/Chicago', label: 'Central Time (CT)' },
-  { value: 'America/Denver', label: 'Mountain Time (MT)' },
-  { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
-  { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
-  { value: 'Pacific/Honolulu', label: 'Hawaii Time (HST)' },
-  { value: 'UTC', label: 'UTC/GMT' },
+export const VIDEO_CALL_PLATFORM_OPTIONS: SelectOption[] = [
+  { value: 'zoom', label: 'Zoom' },
+  { value: 'google-meet', label: 'Google Meet' },
+  { value: 'webex', label: 'Webex' },
+  { value: 'other', label: 'Other' },
 ];
 
 export const REFERRAL_SOURCE_OPTIONS: SelectOption[] = [
