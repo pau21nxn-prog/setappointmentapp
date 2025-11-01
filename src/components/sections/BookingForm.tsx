@@ -74,7 +74,10 @@ const BookingForm: React.FC = () => {
       referral_source: '',
       preferred_date: '',
       preferred_time: '',
+      timezone:
+        typeof window !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC',
       video_call_platform: '',
+      video_call_platform_other: '',
       website: '', // Honeypot field for spam detection
     },
   });
@@ -216,7 +219,7 @@ const BookingForm: React.FC = () => {
       case 1:
         return <ProjectDetailsStep register={register} errors={errors} watch={watch} />;
       case 2:
-        return <SchedulingStep register={register} errors={errors} />;
+        return <SchedulingStep register={register} errors={errors} watch={watch} />;
       default:
         return null;
     }

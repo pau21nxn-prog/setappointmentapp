@@ -72,8 +72,8 @@ const Services: React.FC = () => {
         {/* CTA */}
         <div className="text-center mt-16">
           <p className="text-gray-600 mb-6">
-            79% of entrepreneurs with a business website expect to grow at least 25% in the next 3-5
-            years
+            79% of entrepreneurs with a business website is forecasted to grow at least 25% in the
+            next 3-5 years
           </p>
           <a
             href="#booking"

@@ -44,6 +44,14 @@ export async function createAppointment(
   try {
     const supabase = createServerClient();
 
+    // Prepare additional notes with video platform info if "other" was selected
+    let notes = data.additional_notes || '';
+    if (data.video_call_platform === 'other' && data.video_call_platform_other) {
+      notes = notes
+        ? `${notes}\n\nPreferred video platform: ${data.video_call_platform_other}`
+        : `Preferred video platform: ${data.video_call_platform_other}`;
+    }
+
     const appointmentData = {
       full_name: `${data.first_name} ${data.last_name}`,
       email: data.email,
@@ -57,11 +65,11 @@ export async function createAppointment(
       budget_range: 'not-specified', // Default value since field removed from form
       timeline: 'flexible', // Default value since field removed from form
       features: data.features,
-      additional_notes: data.additional_notes || null,
+      additional_notes: notes || null,
       referral_source: data.referral_source,
       preferred_date: data.preferred_date,
       preferred_time: data.preferred_time,
-      timezone: 'UTC', // Default value since field removed from form
+      timezone: data.timezone,
       status: 'pending' as const,
       ip_address: data.ip_address || null,
       user_agent: data.user_agent || null,

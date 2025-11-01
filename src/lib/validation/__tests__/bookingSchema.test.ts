@@ -168,7 +168,9 @@ describe('Scheduling Schema', () => {
     const validData = {
       preferred_date: tomorrowStr,
       preferred_time: 'morning',
+      timezone: 'America/New_York',
       video_call_platform: 'zoom',
+      video_call_platform_other: '',
     };
 
     expect(() => schedulingSchema.parse(validData)).not.toThrow();
@@ -182,6 +184,7 @@ describe('Scheduling Schema', () => {
     const invalidData = {
       preferred_date: yesterdayStr,
       preferred_time: 'morning',
+      timezone: 'America/New_York',
       video_call_platform: 'zoom',
     };
 
@@ -194,7 +197,9 @@ describe('Scheduling Schema', () => {
     const validData = {
       preferred_date: today,
       preferred_time: 'afternoon',
+      timezone: 'America/Los_Angeles',
       video_call_platform: 'google-meet',
+      video_call_platform_other: '',
     };
 
     expect(() => schedulingSchema.parse(validData)).not.toThrow();
@@ -207,23 +212,55 @@ describe('Scheduling Schema', () => {
       const validData = {
         preferred_date: today,
         preferred_time: time,
+        timezone: 'UTC',
         video_call_platform: 'zoom',
+        video_call_platform_other: '',
       };
       expect(() => schedulingSchema.parse(validData)).not.toThrow();
     });
   });
 
-  it('validates all video call platforms', () => {
+  it('validates all video call platforms including Teams', () => {
     const today = new Date().toISOString().split('T')[0];
 
-    ['zoom', 'google-meet', 'webex', 'other'].forEach((platform) => {
+    ['zoom', 'google-meet', 'teams', 'webex', 'other'].forEach((platform) => {
       const validData = {
         preferred_date: today,
         preferred_time: 'morning',
+        timezone: 'America/Chicago',
         video_call_platform: platform,
+        video_call_platform_other: '',
       };
       expect(() => schedulingSchema.parse(validData)).not.toThrow();
     });
+  });
+
+  it('accepts video_call_platform_other when platform is other', () => {
+    const today = new Date().toISOString().split('T')[0];
+
+    const validData = {
+      preferred_date: today,
+      preferred_time: 'morning',
+      timezone: 'UTC',
+      video_call_platform: 'other',
+      video_call_platform_other: 'Skype',
+    };
+
+    expect(() => schedulingSchema.parse(validData)).not.toThrow();
+  });
+
+  it('accepts empty video_call_platform_other when platform is not other', () => {
+    const today = new Date().toISOString().split('T')[0];
+
+    const validData = {
+      preferred_date: today,
+      preferred_time: 'morning',
+      timezone: 'UTC',
+      video_call_platform: 'zoom',
+      video_call_platform_other: '',
+    };
+
+    expect(() => schedulingSchema.parse(validData)).not.toThrow();
   });
 });
 
@@ -253,7 +290,42 @@ describe('Complete Booking Form Schema', () => {
       // Scheduling
       preferred_date: tomorrowStr,
       preferred_time: 'morning',
+      timezone: 'America/New_York',
       video_call_platform: 'zoom',
+      video_call_platform_other: '',
+    };
+
+    expect(() => bookingFormSchema.parse(validData)).not.toThrow();
+  });
+
+  it('validates complete booking form data with Teams platform', () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const validData = {
+      // Personal Info
+      first_name: 'Jane',
+      last_name: 'Smith',
+      email: 'jane@example.com',
+      phone: '+12345678901',
+      company_name: 'Business Inc',
+      industry: 'finance',
+      industry_other: '',
+      website_url: '',
+      current_website: false,
+      // Project Details
+      project_type: 'website-redesign',
+      project_description: 'We need to redesign our existing website with modern features',
+      features: ['contact-forms', 'blog', 'analytics'],
+      additional_notes: '',
+      referral_source: 'social-media',
+      // Scheduling
+      preferred_date: tomorrowStr,
+      preferred_time: 'afternoon',
+      timezone: 'Europe/London',
+      video_call_platform: 'teams',
+      video_call_platform_other: '',
     };
 
     expect(() => bookingFormSchema.parse(validData)).not.toThrow();

@@ -1,17 +1,24 @@
 import React from 'react';
-import { UseFormRegister, FieldErrors } from 'react-hook-form';
+import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
 import DatePicker from '@/components/ui/DatePicker';
 import Select from '@/components/ui/Select';
+import { Input } from '@/components/ui/Input';
 import { BookingFormData } from '@/lib/validation/bookingSchema';
-import { PREFERRED_TIME_OPTIONS, VIDEO_CALL_PLATFORM_OPTIONS } from '@/constants/formOptions';
+import {
+  PREFERRED_TIME_OPTIONS,
+  VIDEO_CALL_PLATFORM_OPTIONS,
+  TIMEZONE_OPTIONS,
+} from '@/constants/formOptions';
 import { Calendar, Clock, Video } from 'lucide-react';
 
 export interface SchedulingStepProps {
   register: UseFormRegister<BookingFormData>;
   errors: FieldErrors<BookingFormData>;
+  watch: UseFormWatch<BookingFormData>;
 }
 
-const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors }) => {
+const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors, watch }) => {
+  const selectedPlatform = watch('video_call_platform');
   return (
     <div className="space-y-6">
       <div>
@@ -61,6 +68,15 @@ const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors }) => 
       />
 
       <Select
+        label="Timezone"
+        {...register('timezone')}
+        error={errors.timezone?.message}
+        options={TIMEZONE_OPTIONS}
+        required
+        helperText="Auto-detected from your browser"
+      />
+
+      <Select
         label="Video Call Platform"
         {...register('video_call_platform')}
         error={errors.video_call_platform?.message}
@@ -68,6 +84,16 @@ const SchedulingStep: React.FC<SchedulingStepProps> = ({ register, errors }) => 
         required
         helperText="Select your preferred platform for the video consultation"
       />
+
+      {selectedPlatform === 'other' && (
+        <Input
+          label="Please specify platform"
+          {...register('video_call_platform_other')}
+          error={errors.video_call_platform_other?.message}
+          placeholder="Enter your preferred video platform"
+          helperText="Let us know which platform you'd like to use"
+        />
+      )}
 
       {/* Quick Selection Helpers */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">

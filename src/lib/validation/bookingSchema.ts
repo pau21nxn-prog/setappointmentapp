@@ -98,7 +98,15 @@ export const schedulingSchema = z.object({
 
   preferred_time: z.string().min(1, 'Please select a preferred time'),
 
+  timezone: z.string().min(1, 'Please select your timezone'),
+
   video_call_platform: z.string().min(1, 'Please select a video call platform'),
+
+  video_call_platform_other: z
+    .string()
+    .max(255, 'Platform name must be less than 255 characters')
+    .optional()
+    .or(z.literal('')),
 });
 
 // Combined Schema for Complete Form Validation

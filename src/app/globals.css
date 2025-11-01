@@ -51,6 +51,8 @@ body {
   border-radius: 0.375rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  color: #111827; /* gray-900 - dark text */
+  background-color: #ffffff; /* white background */
   transition: all 0.15s ease-in-out;
 }
 
@@ -68,7 +70,8 @@ body {
   padding: 0.5rem 0.5rem;
   border: 1px solid #d1d5db; /* gray-300 */
   border-radius: 0.375rem 0 0 0.375rem;
-  background-color: #f9fafb; /* gray-50 */
+  background-color: #ffffff; /* white background for better contrast */
+  color: #111827; /* gray-900 - dark text */
   font-size: 0.875rem;
   cursor: pointer;
 }
@@ -76,6 +79,43 @@ body {
 .phone-input-custom .PhoneInputCountrySelect:focus {
   outline: none;
   border-color: #10b981; /* emerald-500 */
+}
+
+/* Fix dropdown option text color */
+.phone-input-custom .PhoneInputCountrySelectDropdown {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.phone-input-custom .PhoneInputCountryOption {
+  padding: 0.5rem;
+  color: #111827; /* gray-900 - dark text */
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.phone-input-custom .PhoneInputCountryOption:hover {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+.phone-input-custom .PhoneInputCountryOption--selected {
+  background-color: #3b82f6; /* blue-500 */
+  color: #ffffff; /* white text on selected */
+}
+
+.phone-input-custom .PhoneInputCountryOption--focused {
+  background-color: #dbeafe; /* blue-100 */
+  color: #111827; /* gray-900 */
+}
+
+/* Ensure flag icons are visible */
+.phone-input-custom .PhoneInputCountryIconImg {
+  display: block;
+  width: 1.25rem;
+  height: 1rem;
+  margin-right: 0.5rem;
 }
 
 .phone-input-custom {
