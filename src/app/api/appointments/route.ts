@@ -155,23 +155,37 @@ export async function POST(request: NextRequest) {
     // Send confirmation emails (client + admin)
     const clientEmail = generateClientConfirmationEmail(appointment);
     const adminEmail = generateAdminNotificationEmail(appointment);
-    const adminEmailAddress = process.env.ADMIN_EMAIL || 'admin@setappointmentapp.com';
+    const adminEmailAddress = process.env.EMAIL_ADMIN || 'admin@setappointmentapp.com';
 
-    // Send emails in parallel (non-blocking - don't fail if emails fail)
-    sendBulkEmails([
-      {
-        to: appointment.email,
-        ...clientEmail,
-      },
-      {
-        to: adminEmailAddress,
-        ...adminEmail,
-        replyTo: appointment.email,
-      },
-    ]).catch((error) => {
-      // Log error but don't fail the request
-      console.error('Error sending emails:', error);
+    console.log('📧 Sending appointment confirmation emails:', {
+      client: appointment.email,
+      admin: adminEmailAddress,
+      appointmentId: appointment.id,
     });
+
+    // Send emails and await completion (critical for serverless functions)
+    try {
+      const results = await sendBulkEmails([
+        {
+          to: appointment.email,
+          ...clientEmail,
+        },
+        {
+          to: adminEmailAddress,
+          ...adminEmail,
+          replyTo: appointment.email,
+        },
+      ]);
+      console.log('✅ Emails sent successfully:', {
+        clientSuccess: results[0]?.success,
+        adminSuccess: results[1]?.success,
+        clientMessageId: results[0]?.messageId,
+        adminMessageId: results[1]?.messageId,
+      });
+    } catch (error) {
+      // Log error but don't fail the booking request
+      console.error('❌ Error sending emails:', error);
+    }
 
     // Return success response with appointment ID
     return NextResponse.json(
