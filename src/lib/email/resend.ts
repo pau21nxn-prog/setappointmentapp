@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 import { createServerClient } from '@/lib/supabase/server';
+import { render } from '@react-email/render';
+import * as React from 'react';
 
 // Initialize Resend with API key (or dummy key for build time)
 const resendApiKey = process.env.RESEND_API_KEY || 're_placeholder_key_for_build';
@@ -8,8 +10,9 @@ const resend = new Resend(resendApiKey);
 export interface SendEmailParams {
   to: string | string[];
   subject: string;
-  html: string;
-  text: string;
+  html?: string;
+  text?: string;
+  react?: React.ReactElement;
   replyTo?: string;
 }
 
@@ -23,7 +26,7 @@ export interface SendEmailResult {
  * Send an email using Resend and log to database
  */
 export async function sendEmail(params: SendEmailParams): Promise<SendEmailResult> {
-  const { to, subject, html, text, replyTo } = params;
+  const { to, subject, html, text, react, replyTo } = params;
   const fromEmail = process.env.EMAIL_FROM || 'noreply@setappointmentapp.com';
 
   // Check if Resend is properly configured
@@ -45,13 +48,22 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
   }
 
   try {
+    // Render React component to HTML if provided
+    let emailHtml = html;
+    let emailText = text;
+
+    if (react) {
+      emailHtml = await render(react);
+      emailText = emailText || (await render(react, { plainText: true }));
+    }
+
     // Send email via Resend
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: Array.isArray(to) ? to : [to],
       subject,
-      html,
-      text,
+      html: emailHtml as string,
+      text: emailText,
       replyTo: replyTo || fromEmail,
     });
 
