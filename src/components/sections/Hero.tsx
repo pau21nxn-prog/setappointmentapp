@@ -35,10 +35,10 @@ const Hero: React.FC = () => {
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Launch your Professional
+            Launch your
             <br />
             <span className="bg-gradient-to-r from-emerald-200 to-white bg-clip-text text-transparent">
-              Business Website now!
+              Professional Business Website now!
             </span>
           </h1>
 

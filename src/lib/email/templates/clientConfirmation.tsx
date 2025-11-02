@@ -87,8 +87,6 @@ function ClientConfirmationEmail({ appointment }: { appointment: Appointment }) 
             </Text>
             <Text style={styles.contactInfo}>
               <strong>Email:</strong> hello@setappointmentapp.com
-              <br />
-              <strong>Phone:</strong> (123) 456-7890
             </Text>
             <Text style={styles.paragraphSmall}>Looking forward to speaking with you soon!</Text>
             <Text style={styles.signature}>

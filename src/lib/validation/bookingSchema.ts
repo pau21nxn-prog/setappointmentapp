@@ -76,7 +76,7 @@ export const projectDetailsSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  referral_source: z.string().min(1, 'Please tell us how you found us'),
+  referral_source: z.string().optional().or(z.literal('')),
 });
 
 // Step 3: Scheduling Schema

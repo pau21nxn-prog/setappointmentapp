@@ -66,7 +66,7 @@ export async function createAppointment(
       timeline: 'flexible', // Default value since field removed from form
       features: data.features,
       additional_notes: notes || null,
-      referral_source: data.referral_source,
+      referral_source: data.referral_source || 'not-specified',
       preferred_date: data.preferred_date,
       preferred_time: data.preferred_time,
       timezone: data.timezone,
