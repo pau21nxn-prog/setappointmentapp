@@ -14,7 +14,7 @@
 
 import { getAdminSession, createServiceClient } from '@/lib/auth/admin';
 import { revalidatePath } from 'next/cache';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/email/mailer';
 import { getEmailTemplate, EmailTemplateType } from '@/lib/email/adminTemplates';
 
 type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -192,17 +192,6 @@ export async function bulkSendAppointmentEmails(
       };
     }
 
-    // Check for Resend API key
-    if (!process.env.RESEND_API_KEY) {
-      return {
-        success: false,
-        message: 'Email service not configured',
-        sentCount: 0,
-        failedCount: appointmentIds.length,
-        errors: ['RESEND_API_KEY environment variable is missing'],
-      };
-    }
-
     if (!appointmentIds || appointmentIds.length === 0) {
       return {
         success: false,
@@ -213,7 +202,6 @@ export async function bulkSendAppointmentEmails(
     }
 
     const supabase = createServiceClient();
-    const resend = new Resend(process.env.RESEND_API_KEY);
     const errors: string[] = [];
     let sentCount = 0;
     let failedCount = 0;
@@ -237,39 +225,22 @@ export async function bulkSendAppointmentEmails(
         // Generate email template
         const { subject, html } = getEmailTemplate(templateType, appointment, customData);
 
-        // Send email
-        const { data, error: sendError } = await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'noreply@example.com',
+        // Send email using our mailer service
+        const result = await sendEmail({
           to: appointment.email,
-          replyTo: process.env.EMAIL_ADMIN || undefined,
           subject,
           html,
+          replyTo: process.env.EMAIL_ADMIN,
         });
 
-        if (sendError) {
-          // Log email failure
-          await supabase.from('email_logs').insert({
-            appointment_id: appointmentId,
-            recipient_email: appointment.email,
-            email_type: 'bulk_message',
-            status: 'failed',
-            error_message: sendError.message,
-          });
-
-          errors.push(`${appointment.full_name} (${appointment.email}): ${sendError.message}`);
+        if (!result.success) {
+          // Email logging is handled in sendEmail function
+          errors.push(
+            `${appointment.full_name} (${appointment.email}): ${result.error || 'Unknown error'}`
+          );
           failedCount++;
           continue;
         }
-
-        // Log successful email
-        await supabase.from('email_logs').insert({
-          appointment_id: appointmentId,
-          recipient_email: appointment.email,
-          email_type: 'bulk_message',
-          status: 'sent',
-          provider_message_id: data?.id,
-          sent_at: new Date().toISOString(),
-        });
 
         sentCount++;
       } catch (err) {

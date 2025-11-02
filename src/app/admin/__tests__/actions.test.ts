@@ -23,11 +23,10 @@ import {
   sendAppointmentEmail,
 } from '../actions';
 import { signOutAdmin, getAdminSession, createServiceClient } from '@/lib/auth/admin';
-import { Resend } from 'resend';
 
 // Mock dependencies
 jest.mock('@/lib/auth/admin');
-jest.mock('resend');
+jest.mock('@/lib/email/mailer');
 jest.mock('next/navigation', () => ({
   redirect: jest.fn(),
 }));

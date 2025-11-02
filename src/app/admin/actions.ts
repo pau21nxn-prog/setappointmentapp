@@ -16,7 +16,7 @@
 import { signOutAdmin, getAdminSession, createServiceClient } from '@/lib/auth/admin';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/email/mailer';
 import { getEmailTemplate, EmailTemplateType } from '@/lib/email/adminTemplates';
 
 // Type definitions
@@ -426,15 +426,6 @@ export async function sendAppointmentEmail(
       };
     }
 
-    // Check for Resend API key
-    if (!process.env.RESEND_API_KEY) {
-      return {
-        success: false,
-        message: 'Email service not configured',
-        error: 'RESEND_API_KEY environment variable is missing',
-      };
-    }
-
     const supabase = createServiceClient();
 
     // Fetch appointment data
@@ -455,44 +446,22 @@ export async function sendAppointmentEmail(
     // Generate email template
     const { subject, html } = getEmailTemplate(templateType, appointment, customData);
 
-    // Initialize Resend
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    // Send email
-    const { data, error: sendError } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'noreply@example.com',
+    // Send email using our mailer service
+    const result = await sendEmail({
       to: appointment.email,
-      replyTo: process.env.EMAIL_ADMIN || undefined,
       subject,
       html,
+      replyTo: process.env.EMAIL_ADMIN,
     });
 
-    if (sendError) {
-      // Log email failure
-      await supabase.from('email_logs').insert({
-        appointment_id: appointmentId,
-        recipient_email: appointment.email,
-        email_type: 'admin_message',
-        status: 'failed',
-        error_message: sendError.message,
-      });
-
+    if (!result.success) {
+      // Email logging is handled in sendEmail function
       return {
         success: false,
         message: 'Failed to send email',
-        error: sendError.message,
+        error: result.error || 'Unknown error',
       };
     }
-
-    // Log successful email
-    await supabase.from('email_logs').insert({
-      appointment_id: appointmentId,
-      recipient_email: appointment.email,
-      email_type: 'admin_message',
-      status: 'sent',
-      provider_message_id: data?.id,
-      sent_at: new Date().toISOString(),
-    });
 
     // Revalidate appointment detail page
     revalidatePath(`/admin/appointments/${appointmentId}`);
@@ -500,7 +469,7 @@ export async function sendAppointmentEmail(
     return {
       success: true,
       message: 'Email sent successfully',
-      emailId: data?.id,
+      emailId: result.messageId,
     };
   } catch (error) {
     console.error('Error sending appointment email:', error);

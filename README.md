@@ -185,8 +185,11 @@ setappointmentapp/
 │   ├── production.yml
 │   └── pr-checks.yml
 ├── .husky/                     # Git hooks
-├── Task Summaries/             # Phase implementation summaries
-│   └── Phase-1-Implementation-Summary.md
+├── docs/                       # 📚 Project documentation (guides, summaries, troubleshooting)
+│   ├── Phase-1-Implementation-Summary.md
+│   ├── GMAIL_OAUTH2_SETUP_GUIDE.md
+│   ├── DEPLOYMENT_GUIDE.md
+│   └── screenshots/            # 📸 Troubleshooting images and visual guides (DO NOT DELETE)
 ├── public/                     # Static assets
 │   ├── images/
 │   └── videos/
@@ -226,6 +229,50 @@ setappointmentapp/
 ├── vercel.json                 # Vercel deployment config
 └── package.json                # Dependencies and scripts
 ```
+
+### 📚 Documentation Guidelines
+
+**IMPORTANT:** All project documentation must be saved in the `docs/` folder for easy access and organization.
+
+#### Documentation Structure
+
+```
+docs/
+├── *.md                        # All markdown documentation files
+├── screenshots/                # Troubleshooting images and visual guides
+│   ├── setup/                  # Setup and configuration screenshots
+│   ├── errors/                 # Error messages and debugging visuals
+│   └── guides/                 # Step-by-step visual guides
+└── archives/                   # Archived documentation (optional)
+```
+
+#### What to Save in `docs/`
+
+- ✅ **Implementation Summaries** - Phase completion reports
+- ✅ **Setup Guides** - Configuration and installation instructions
+- ✅ **Deployment Guides** - Production deployment documentation
+- ✅ **API Documentation** - Endpoint specifications and usage
+- ✅ **Troubleshooting Guides** - Common issues and solutions
+- ✅ **Architecture Decisions** - Technical decisions and rationale
+- ✅ **Migration Guides** - Upgrade and migration instructions
+- ✅ **Security Documentation** - Security measures and best practices
+
+#### Screenshots Folder
+
+**DO NOT DELETE** the `docs/screenshots/` folder. It is reserved for:
+
+- 📸 Setup process screenshots
+- 📸 Error message captures
+- 📸 UI/UX mockups
+- 📸 Troubleshooting visual aids
+- 📸 Step-by-step tutorial images
+- 📸 Configuration examples
+
+**Naming Convention:**
+
+- Use descriptive names: `gmail-oauth-consent-screen.png`
+- Include dates for time-sensitive content: `deployment-error-2025-11-02.png`
+- Organize in subfolders by category
 
 ## 🚦 Getting Started
 

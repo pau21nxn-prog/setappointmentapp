@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { bookingFormSchema } from '@/lib/validation/bookingSchema';
 import { createAppointment, checkDuplicateAppointment } from '@/lib/supabase/appointments';
 import { ZodError } from 'zod';
-import { sendBulkEmails } from '@/lib/email/resend';
+import { sendBulkEmails } from '@/lib/email/mailer';
 import { generateClientConfirmationEmail } from '@/lib/email/templates/clientConfirmation';
 import { generateAdminNotificationEmail } from '@/lib/email/templates/adminNotification';
 import {
