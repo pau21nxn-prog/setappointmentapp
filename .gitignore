@@ -29,6 +29,71 @@ yarn-error.log*
 .env*.local
 .env.local
 .env
+.env.development
+.env.production
+.env.staging
+.env.test
+.env*.backup
+
+# =============================================================================
+# Security & Credentials - Comprehensive Protection
+# =============================================================================
+# Pattern-based rules to automatically catch credential files anywhere in project
+# This prevents accidental exposure of sensitive information
+
+# Credential files (any case, anywhere in project)
+**/*CREDENTIAL*
+**/*credential*
+**/*Credential*
+
+# Secret files
+**/*SECRET*
+**/*secret*
+**/*Secret*
+
+# Sensitive files
+**/*SENSITIVE*
+**/*sensitive*
+**/*Sensitive*
+
+# Password files
+**/*PASSWORD*
+**/*password*
+**/*Password*
+
+# API keys and tokens
+**/API_KEY*
+**/api_key*
+**/API_TOKEN*
+**/api_token*
+**/*-token.*
+**/*-key.*
+
+# Private key files
+**/*.key
+**/*-private.*
+**/*_private.*
+
+# Backup and temporary files (may contain credentials)
+*.backup
+*.bak
+*.tmp
+*.temp
+*-copy.*
+*-copy-*
+*-old.*
+*-OLD.*
+*.orig
+*.swp
+*.swo
+*~
+
+# Configuration files that might contain secrets
+**/config/local.*
+**/config/secret.*
+**/secrets.json
+**/secrets.yaml
+**/secrets.yml
 
 # vercel
 .vercel
