@@ -133,8 +133,12 @@ export function sanitizeMultilineText(text: string): string {
 export function sanitizeBookingFormData(data: Record<string, unknown>): Record<string, unknown> {
   const sanitized: Record<string, unknown> = {};
 
-  // Text fields
+  // Name fields (first_name and last_name from form, or full_name for backward compatibility)
+  if (typeof data.first_name === 'string') sanitized.first_name = sanitizeText(data.first_name);
+  if (typeof data.last_name === 'string') sanitized.last_name = sanitizeText(data.last_name);
   if (typeof data.full_name === 'string') sanitized.full_name = sanitizeText(data.full_name);
+
+  // Other text fields
   if (typeof data.company_name === 'string')
     sanitized.company_name = sanitizeText(data.company_name);
   if (typeof data.industry === 'string') sanitized.industry = sanitizeText(data.industry);
